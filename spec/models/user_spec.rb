@@ -9,7 +9,7 @@ RSpec.describe User, type: :model do
       should validate_presence_of(:auth_token)
     end
 
-    it 'valdate relations' do
+    it 'validate relations' do
       should have_many(:post)
     end
   end
