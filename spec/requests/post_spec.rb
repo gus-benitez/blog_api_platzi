@@ -1,33 +1,31 @@
 require 'rails_helper'
+require "byebug"
 
 RSpec.describe 'Post endpoint', type: :request do
-  describe 'GET /post' do
-    before { get '/post'}
+  describe 'GET /posts' do
+    before { get '/posts'}
 
     it 'It should return OK, when there are no posts' do
       expect(response).to have_http_status(200)
       payload = JSON.parse(response.body)
       expect(payload).to be_empty
-      expect(payload['api']).to eq('OK')
     end
 
+    # let, is from rspec => let! (The execution is immediate), let(Execution is done when the variable is used)
+    # create_list is from Factory bot
+    let!(:posts) { create_list(:post, 10, published: true) }
     it 'It should return OK, when it returns multiple posts' do
-      # let, is from rspec
-      # create_list is from Factory bot
-      let(:posts) { create_list(:post,  10, published: true) }
-
+      get '/posts'
       expect(response).to have_http_status(200)
       payload = JSON.parse(response.body)
       expect(payload.size).to eq(posts.size)
-      expect(payload['api']).to eq('OK')
     end
   end
 
-  describe 'GET /post/{id}' do
+  describe 'GET /posts/{id}' do
+    let(:post) { create(:post) }
     it 'It should return OK, when it return a post' do
-      let(:posts) { create_list(:post) }
-      get "/post/#{post.id}"
-
+      get "/posts/#{post.id}"
       expect(response).to have_http_status(200)
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
