@@ -1,5 +1,5 @@
 require 'rails_helper'
-require "byebug"
+require 'byebug'
 
 RSpec.describe 'Post endpoint', type: :request do
   describe 'GET /posts' do
@@ -30,6 +30,79 @@ RSpec.describe 'Post endpoint', type: :request do
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
       expect(payload['id']).to eq(post.id)
+    end
+  end
+
+  describe 'POST /posts' do
+    let!(:user) { create(:user) }
+
+    it 'should create a post' do
+      req_payload = {
+        post: {
+          title: 'titulo',
+          content: 'content',
+          published: false,
+          user_id: user.id
+        }
+      }
+      # POST HTTP
+      post '/posts', params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload['id']).to_not be_nil
+      expect(response).to have_http_status(:created)
+    end
+
+    it 'should return error message on invalid post' do
+      req_payload = {
+        post: {
+          content: 'content',
+          published: false,
+          user_id: user.id
+        }
+      }
+      # POST HTTP
+      post '/posts', params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload['error']).to_not be_empty
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe 'PUT /posts/{id}' do
+    let!(:article) { create(:post) }
+
+    it 'should create a post' do
+      req_payload = {
+        post: {
+          title: 'titulo',
+          content: 'content',
+          published: true
+        }
+      }
+      # PUT HTTP
+      put "/posts/#{article.id}", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload['id']).to eq(article.id)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'should return error message on invalid post' do
+      req_payload = {
+        post: {
+          title: nil,
+          content: nil,
+          published: false,
+        }
+      }
+      # PUT HTTP
+      put "/posts/#{article.id}", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload['error']).to_not be_empty
+      expect(response).to have_http_status(:unprocessable_entity)
     end
   end
 end
