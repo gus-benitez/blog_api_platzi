@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Post endpoint', type: :request do
   describe 'GET /posts' do
-    before { get '/posts'}
+    before { get '/posts' }
 
     it 'It should return OK, when there are no posts' do
       expect(response).to have_http_status(200)
@@ -17,9 +17,10 @@ RSpec.describe 'Post endpoint', type: :request do
       get '/posts'
       expect(response).to have_http_status(200)
       payload = JSON.parse(response.body)
+      expect(payload.size).to eq(posts.size)
     end
   end
-  
+
   describe 'GET /posts with Search' do
     let!(:post_hola_mundo) { create(:published_post, title: 'Hola mundo') }
     let!(:post_hola_rails) { create(:published_post, title: 'Hola rails') }
@@ -30,7 +31,7 @@ RSpec.describe 'Post endpoint', type: :request do
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
       expect(payload.size).to eq(2)
-      expect(payload.map { |p| p['id'] }.sort).to eq([post_hola_mundo.id, post_hola_rails.id].sort )
+      expect(payload.map { |p| p['id'] }.sort).to eq([post_hola_mundo.id, post_hola_rails.id].sort)
     end
   end
 
@@ -112,7 +113,7 @@ RSpec.describe 'Post endpoint', type: :request do
         post: {
           title: nil,
           content: nil,
-          published: false,
+          published: false
         }
       }
       # PUT HTTP
