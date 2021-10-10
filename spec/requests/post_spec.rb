@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'byebug'
 
 RSpec.describe 'Post endpoint', type: :request do
   describe 'GET /posts' do
@@ -18,7 +17,20 @@ RSpec.describe 'Post endpoint', type: :request do
       get '/posts'
       expect(response).to have_http_status(200)
       payload = JSON.parse(response.body)
-      expect(payload.size).to eq(posts.size)
+    end
+  end
+  
+  describe 'GET /posts with Search' do
+    let!(:post_hola_mundo) { create(:published_post, title: 'Hola mundo') }
+    let!(:post_hola_rails) { create(:published_post, title: 'Hola rails') }
+    let!(:post_curso_rails) { create(:published_post, title: 'Curso rails') }
+    it 'It should filter posts by title' do
+      get '/posts?search=hola'
+      expect(response).to have_http_status(200)
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload.size).to eq(2)
+      expect(payload.map { |p| p['id'] }.sort).to eq([post_hola_mundo.id, post_hola_rails.id].sort )
     end
   end
 
