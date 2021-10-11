@@ -6,6 +6,9 @@ class PostsController < ApplicationController
   rescue_from Exception do |error|
     render json: { error: error.message }, status: :internal_error
   end
+  rescue_from ActiveRecord::RecordNotFound do |error|
+    render json: { error: error.message }, status: :not_found
+  end
   rescue_from ActiveRecord::RecordInvalid do |error|
     render json: { error: error.message }, status: :unprocessable_entity
   end
@@ -29,13 +32,13 @@ class PostsController < ApplicationController
 
   # POST /posts
   def create
-    post = Current.user.posts.create!(create_params)
+    post = Current.user.post.create!(create_params)
     render json: post, status: :created
   end
 
   # PUT /posts/{id}
   def update
-    post = Current.user.posts.find(params[:id])
+    post = Current.user.post.find(params[:id])
     post.update!(update_params)
     render json: post, status: :ok
   end
